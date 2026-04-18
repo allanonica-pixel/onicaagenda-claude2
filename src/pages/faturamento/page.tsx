@@ -83,7 +83,7 @@ export default function FaturamentoPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
-      <main className="mx-auto max-w-5xl px-4 pb-10 pt-24 sm:pt-20">
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-16 md:pb-10 md:pt-20">
         {/* Hero */}
         <div className="mb-6 rounded-[2rem] bg-teal-700 px-6 py-6 text-white shadow-lg">
           <h1 className="text-2xl font-bold">Estimativa de Faturamento</h1>

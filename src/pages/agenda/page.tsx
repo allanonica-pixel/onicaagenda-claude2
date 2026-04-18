@@ -126,7 +126,7 @@ export default function AgendaPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
-      <main className="mx-auto max-w-5xl px-4 pb-10 pt-24 sm:pt-20">
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-16 md:pb-10 md:pt-20">
         {/* Hero */}
         <div className="mb-6 rounded-[2rem] bg-teal-700 px-6 py-6 text-white shadow-lg">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

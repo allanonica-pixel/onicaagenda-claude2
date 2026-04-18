@@ -1,6 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { usePortalAuth } from '../contexts/PortalAuthContext';
 
+const NAV_ITEMS = [
+  { to: '/', icon: 'ri-calendar-line', iconActive: 'ri-calendar-fill', label: 'Agenda' },
+  { to: '/faturamento', icon: 'ri-money-dollar-circle-line', iconActive: 'ri-money-dollar-circle-fill', label: 'Faturamento' },
+  { to: '/relatorios', icon: 'ri-bar-chart-line', iconActive: 'ri-bar-chart-fill', label: 'Relatórios' },
+];
+
 export default function Header() {
   const { professionalName, signOut } = usePortalAuth();
   const navigate = useNavigate();
@@ -11,90 +17,108 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600">
-              <i className="ri-stethoscope-line text-sm text-white"></i>
+    <>
+      {/* ── Desktop top bar (md+) ─────────────────────────────── */}
+      <header className="fixed inset-x-0 top-0 z-50 hidden border-b border-slate-200 bg-white/95 backdrop-blur-sm md:block">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-700">
+                <i className="ri-stethoscope-line text-sm text-white"></i>
+              </div>
+              <span className="font-bold text-slate-900">Ônica</span>
+              <span className="text-xs font-medium text-slate-400">· Portal Profissional</span>
             </div>
-            <span className="font-bold text-slate-900">Ônica</span>
-            <span className="hidden text-xs font-medium text-slate-400 sm:block">· Portal Profissional</span>
+
+            <nav className="flex items-center gap-1">
+              {NAV_ITEMS.map(item => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === '/'}
+                  className={({ isActive }) =>
+                    `flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-teal-50 text-teal-700'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <i className={`${isActive ? item.iconActive : item.icon} text-base`}></i>
+                      {item.label}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
           </div>
 
-          <nav className="hidden items-center gap-1 sm:flex">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`
-              }
+          <div className="flex items-center gap-3">
+            {professionalName && (
+              <span className="text-sm text-slate-500">
+                <i className="ri-user-3-line mr-1 text-slate-300"></i>
+                {professionalName}
+              </span>
+            )}
+            <button
+              onClick={handleSignOut}
+              className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
             >
-              <i className="ri-calendar-line mr-1.5"></i>Agenda
-            </NavLink>
-            <NavLink
-              to="/faturamento"
-              className={({ isActive }) =>
-                `rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`
-              }
-            >
-              <i className="ri-money-dollar-circle-line mr-1.5"></i>Faturamento
-            </NavLink>
-            <NavLink
-              to="/relatorios"
-              className={({ isActive }) =>
-                `rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`
-              }
-            >
-              <i className="ri-bar-chart-line mr-1.5"></i>Relatórios
-            </NavLink>
-          </nav>
+              <i className="ri-logout-box-line mr-1"></i>Sair
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Mobile top bar ────────────────────────────────────── */}
+      <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm md:hidden">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-700">
+            <i className="ri-stethoscope-line text-xs text-white"></i>
+          </div>
+          <span className="font-bold text-slate-900 text-sm">Ônica Pro</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {professionalName && (
-            <span className="hidden text-sm text-slate-600 sm:block">
-              <i className="ri-user-3-line mr-1 text-slate-400"></i>
-              {professionalName}
-            </span>
-          )}
-          <button
-            onClick={handleSignOut}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
-          >
-            <i className="ri-logout-box-line mr-1"></i>Sair
-          </button>
-        </div>
-      </div>
+        {professionalName && (
+          <span className="truncate max-w-[140px] text-xs text-slate-500">
+            {professionalName}
+          </span>
+        )}
 
-      {/* Mobile nav */}
-      <nav className="flex border-t border-slate-100 sm:hidden">
-        {[
-          { to: '/', icon: 'ri-calendar-line', label: 'Agenda' },
-          { to: '/faturamento', icon: 'ri-money-dollar-circle-line', label: 'Faturamento' },
-          { to: '/relatorios', icon: 'ri-bar-chart-line', label: 'Relatórios' },
-        ].map(item => (
+        <button
+          onClick={handleSignOut}
+          className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 active:bg-slate-200"
+          aria-label="Sair"
+        >
+          <i className="ri-logout-box-line text-lg"></i>
+        </button>
+      </header>
+
+      {/* ── Mobile bottom nav bar ─────────────────────────────── */}
+      <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t border-slate-200 bg-white/95 backdrop-blur-sm md:hidden"
+           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {NAV_ITEMS.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) =>
-              `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors ${
-                isActive ? 'text-teal-700' : 'text-slate-500'
+              `flex flex-1 flex-col items-center gap-0.5 py-3 text-xs font-medium transition-colors ${
+                isActive ? 'text-teal-700' : 'text-slate-400'
               }`
             }
           >
-            <i className={`${item.icon} text-xl`}></i>
-            {item.label}
+            {({ isActive }) => (
+              <>
+                <i className={`${isActive ? item.iconActive : item.icon} text-2xl`}></i>
+                <span>{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
-    </header>
+    </>
   );
 }
