@@ -6,7 +6,6 @@ type Step = 'loading' | 'enroll' | 'verify' | 'error';
 export default function MfaSetupPage() {
   const { enrollMfa, verifyMfa, professionalName } = usePortalAuth();
   const [step, setStep] = useState<Step>('loading');
-  const [otpauthUrl, setOtpauthUrl] = useState('');
   const [secret, setSecret] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -21,10 +20,8 @@ export default function MfaSetupPage() {
     setStep('loading');
     try {
       const payload = await enrollMfa();
-      setOtpauthUrl(payload.otpauthUrl);
       setSecret(payload.secret);
 
-      // Gera QR code via API pública (sem enviar dados sensíveis — apenas a URL TOTP)
       const encoded = encodeURIComponent(payload.otpauthUrl);
       setQrDataUrl(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`);
       setStep('enroll');
