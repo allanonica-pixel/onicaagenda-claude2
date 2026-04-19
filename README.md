@@ -1,73 +1,129 @@
-# React + TypeScript + Vite
+# Ônica Pro — Portal do Profissional
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Portal mobile-first para profissionais de saúde visualizarem sua agenda cross-clínica, estimativa de faturamento e relatórios de atendimento.
 
-Currently, two official plugins are available:
+**URL de produção**: https://onicaprofissional-claude.vercel.app
+**Repositório**: https://github.com/allanonica-pixel/onicaagenda-claude2
+**Supabase**: mesmo projeto do sistema principal (`tjfkdaiqycextcvmryks`)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Tecnologia | Versão | Papel |
+|-----------|--------|-------|
+| React | 19 | UI |
+| TypeScript | 6 | Tipagem |
+| Vite | 8 | Build |
+| Tailwind CSS | 3 | Estilos |
+| React Router | 7 | Navegação |
+| Supabase JS | 2 | Auth + Data |
+| otplib | 13 | TOTP (MFA) |
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Arquitetura
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Foco Mobile-First
+- Layout com **bottom navigation bar** fixa + `safe-area-inset-bottom` (suporte ao iPhone notch)
+- Desktop: top navigation bar horizontal
+- `viewport-fit=cover` + meta tags PWA/Apple no `index.html`
+- Padding padrão das páginas: `pb-28 pt-16 md:pb-10 md:pt-20`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Fluxo de Autenticação (`PortalAuthContext`)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+Abrir app
+    │
+    ▼
+Supabase Auth (email + senha) ──── unauthenticated → Tela de login
+    │ autenticado
+    ▼
+Verificar MFA pessoal (localStorage: onica-portal-mfa-verified, 8h)
+    │ não verificado
+    ▼
+professional-mfa-enroll ──── sem MFA → Setup: QR Code + verificação
+    │ MFA ok
+    ▼
+authenticated → App liberado
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Estados do contexto**: `loading | unauthenticated | needs-mfa | authenticated`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Sessão MFA**: armazenada no localStorage com validade de 8 horas:
+```json
+{ "sessionId": "uuid", "expiresAt": 1745000000000 }
 ```
+
+### Dados por Página
+
+| Página | View SQL | Filtro |
+|--------|----------|--------|
+| Agenda (`/`) | `vw_professional_schedule` | `p.email = auth.email()` |
+| Faturamento (`/faturamento`) | `vw_professional_billing_estimate` | `p.email = auth.email()` |
+| Relatórios (`/relatorios`) | `vw_professional_attendance_report` | `p.email = auth.email()` |
+
+As views **não expõem dados clínicos do paciente** (sem nome, CPF, prontuário). Mostram apenas: data, horário, status, tipo, clínica, unidade, convênio, procedimento.
+
+---
+
+## Variáveis de Ambiente
+
+```env
+VITE_SUPABASE_URL=https://tjfkdaiqycextcvmryks.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
+```
+
+Configuradas no painel da Vercel (target: production).
+
+---
+
+## Desenvolvimento Local
+
+```bash
+npm install
+npm run dev
+# → http://localhost:5173
+```
+
+---
+
+## Deploy
+
+```bash
+# Preview
+npx vercel
+
+# Produção
+npx vercel --prod
+```
+
+---
+
+## Estrutura de Pastas
+
+```
+src/
+├── contexts/
+│   └── PortalAuthContext.tsx   # Auth + MFA + estado global
+├── components/
+│   └── Header.tsx              # Top bar (desktop) + Bottom nav (mobile)
+├── pages/
+│   ├── login/page.tsx          # Tela de login
+│   ├── mfa-setup/page.tsx      # Setup TOTP (QR code + verificação)
+│   ├── agenda/page.tsx         # Agenda cross-clínica
+│   ├── faturamento/page.tsx    # Estimativa de faturamento
+│   └── relatorios/page.tsx     # Relatórios de atendimento
+└── lib/
+    └── supabase.ts             # Cliente Supabase (storageKey isolado)
+```
+
+---
+
+## Acesso do Profissional
+
+O profissional usa o **mesmo e-mail e senha** em todas as clínicas onde está cadastrado. O vínculo é feito automaticamente pelo e-mail — sem necessidade de configuração manual por clínica.
+
+- **Conta criada**: quando a clínica cadastra o profissional em `NewProfessionalModal`, a edge function `admin-create-professional-user` cria automaticamente a conta com senha provisória `onica123`
+- **MFA**: configurado uma única vez no portal (pessoal, não por clínica)
+- **Troca de senha**: deve ser feita no primeiro acesso via `profissional.onica.com.br`
