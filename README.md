@@ -2,9 +2,13 @@
 
 > Portal mobile-first para profissionais de saúde visualizarem sua agenda cross-clínica, estimativa de faturamento e relatórios de atendimento.
 
-**URL de produção**: https://onicaprofissional-claude.vercel.app
+| | DEV | PROD |
+|-|-----|------|
+| **URL** | https://onicaprofissional-claude-git-dev-allan-roberts-projects.vercel.app | https://onicaprofissional-claude.vercel.app |
+| **Branch** | `dev` | `main` |
+| **Supabase** | `pecbwtiypupttkqfjwbr` | `tjfkdaiqycextcvmryks` |
+
 **Repositório**: https://github.com/allanonica-pixel/onicaagenda-claude2
-**Supabase**: mesmo projeto do sistema principal (`tjfkdaiqycextcvmryks`)
 
 ---
 
@@ -69,12 +73,18 @@ As views **não expõem dados clínicos do paciente** (sem nome, CPF, prontuári
 
 ## Variáveis de Ambiente
 
+O Vercel injeta automaticamente a variável correta por ambiente. Localmente use o `.env.local` com as chaves **DEV**:
+
 ```env
-VITE_SUPABASE_URL=https://tjfkdaiqycextcvmryks.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGci...
+# .env.local  ← não commitar
+VITE_SUPABASE_URL=https://pecbwtiypupttkqfjwbr.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_T54CjAWyD8lG0XYhmYn92Q_dLf1fFSF
 ```
 
-Configuradas no painel da Vercel (target: production).
+| Ambiente Vercel | Branch | Supabase |
+|----------------|--------|----------|
+| `production` | `main` | PROD (`tjfkdaiqycextcvmryks`) |
+| `preview` / `development` | `dev` / local | DEV (`pecbwtiypupttkqfjwbr`) |
 
 ---
 
@@ -88,14 +98,19 @@ npm run dev
 
 ---
 
-## Deploy
+## Fluxo de Deploy
 
 ```bash
-# Preview
-npx vercel
+# 1. Desenvolva e teste na branch dev
+git checkout dev
+git commit -m "feat: ..."
+git push origin dev
+# → Vercel gera preview automático com Supabase DEV
 
-# Produção
-npx vercel --prod
+# 2. Quando pronto, abra PR: dev → main
+#    https://github.com/allanonica-pixel/onicaagenda-claude2/compare/dev
+
+# 3. Após merge em main → Vercel faz deploy PROD automaticamente
 ```
 
 ---
